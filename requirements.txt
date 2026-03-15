@@ -1,0 +1,16 @@
+# 🧠 Machine Learning
+scikit-learn
+xgboost
+joblib
+
+# 📊 Analyse de données
+pandas
+numpy
+matplotlib
+seaborn
+
+# 🖥️ Interface Web
+streamlit
+
+# (optionnel) Barre de progression
+tqdm

@@ -1,0 +1,20 @@
+# Environnements
+.env
+__pycache__/
+*.pyc
+
+# Dossiers
+data/
+outputs/
+.ipynb_checkpoints/
+
+# Jupyter
+*.ipynb
+
+# VS Code
+.vscode/
+
+# Python env
+*.egg-info/
+.env/
+venv/

@@ -12,5 +12,8 @@ seaborn
 # 🖥️ Interface Web
 streamlit
 
+# Interpretabilite
+shap
+
 # (optionnel) Barre de progression
 tqdm

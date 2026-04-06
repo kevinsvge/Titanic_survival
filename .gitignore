@@ -4,9 +4,12 @@ __pycache__/
 *.pyc
 
 # Dossiers
-data/
 outputs/
 .ipynb_checkpoints/
+
+# Data brute (trop lourde / confidentielle pour git)
+# Decommenter la ligne suivante pour exclure les donnees :
+# data/
 
 # Jupyter
 *.ipynb

@@ -3,6 +3,8 @@
 Prediction de la survie des passagers du Titanic avec Machine Learning,
 deployee sous forme d'interface web interactive avec Streamlit.
 
+**Demo en ligne** : https://titanicsurvival-cvdxgqvfxtea79vpjlxz99.streamlit.app
+
 ---
 
 ## Structure du projet
@@ -13,24 +15,37 @@ Titanic_survival/
 │   └── Titanic-Dataset.csv          # Dataset brut (891 passagers, 12 colonnes)
 ├── models/
 │   ├── XGBoost.joblib               # Modele final sauvegarde
-│   └── feature_engineer.joblib      # FeatureEngineer fitte (requis par l'app)
+│   ├── feature_engineer.joblib      # FeatureEngineer fitte
+│   └── X_train.parquet              # Train set (utilise par SHAP en production)
 ├── src/
 │   ├── feature_engineering.py       # Classe FeatureEngineer (fit/transform)
 │   ├── preprocessing.py             # Chargement + split train/test
 │   ├── train_model.py               # Selection + tuning + sauvegarde
-│   └── evaluate_model.py            # Metriques + visualisations
+│   └── evaluate_model.py            # Metriques + visualisations + SHAP global
 ├── app/
-│   └── interface.py                 # Interface Streamlit
+│   └── interface.py                 # Interface Streamlit + SHAP par prediction
 ├── notebooks/
 │   └── exploration.ipynb            # Analyse exploratoire des donnees
-├── main.py                          # Tests GPU (PyTorch / TensorFlow)
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## Installation
+## Demo
+
+L'application est deployee sur Streamlit Cloud et accessible sans installation :
+
+**https://titanicsurvival-cvdxgqvfxtea79vpjlxz99.streamlit.app**
+
+Fonctionnalites :
+- Saisie des caracteristiques d'un passager (classe, age, sexe, etc.)
+- Prediction de survie avec probabilite en temps reel
+- Graphique SHAP expliquant pourquoi le modele a pris cette decision
+
+---
+
+## Installation locale
 
 ```bash
 python -m venv .venv
@@ -44,8 +59,8 @@ pip install -r requirements.txt
 
 ### 1. Entrainer le modele
 
-A faire une seule fois (ou si vous voulez reentreiner depuis zero).
-Genere `models/XGBoost.joblib` et `models/feature_engineer.joblib`.
+A faire une seule fois (ou pour reentreiner depuis zero).
+Genere `models/XGBoost.joblib`, `models/feature_engineer.joblib` et `models/X_train.parquet`.
 
 ```bash
 python -m src.train_model
@@ -53,7 +68,7 @@ python -m src.train_model
 
 ### 2. Evaluer le modele
 
-Affiche les metriques et les visualisations sur le test set.
+Affiche les metriques, la courbe ROC, la matrice de confusion et le graphique SHAP global.
 
 ```bash
 python -m src.evaluate_model
@@ -115,7 +130,7 @@ Le pattern `fit` / `transform` evite tout data leakage : les statistiques
 
 1. **Cross-validation (5 folds)** sur les 3 modeles candidats
 2. **GridSearchCV** sur le gagnant pour optimiser les hyperparametres
-3. **Sauvegarde** du modele et du FeatureEngineer avec `joblib`
+3. **Sauvegarde** du modele, du FeatureEngineer et de X_train avec `joblib` / `parquet`
 
 Resultats obtenus :
 ```
@@ -137,6 +152,27 @@ Metriques calculees sur le test set (179 passagers) :
 - **ROC-AUC** : 0.84
 - **Rapport de classification** : precision, recall, F1 par classe
 - **Matrice de confusion** : visualisation des erreurs de prediction
+- **SHAP summary** : impact global de chaque feature sur l'ensemble du dataset
+
+---
+
+## Interpretabilite — SHAP
+
+L'analyse SHAP (SHapley Additive exPlanations) explique chaque prediction individuellement.
+
+**Exemple pour une femme de 1ere classe (Cherbourg, 28 ans, billet a 80£) :**
+
+```
+Title (Mrs)     +2.01   forte indication de survie
+FareBand        +0.72   billet cher
+Sex (femme)     +0.70   survie tres favorisee
+Pclass (1ere)   +0.66   classe privilegiee
+Deck (inconnu)  -0.18   cabine non connue
+                ------
+Probabilite de survie : 99%
+```
+
+Le graphique waterfall est affiche directement dans l'interface apres chaque prediction.
 
 ---
 
@@ -145,6 +181,7 @@ Metriques calculees sur le test set (179 passagers) :
 - Python 3.12
 - scikit-learn
 - XGBoost
+- SHAP
 - pandas, numpy
 - matplotlib, seaborn
 - joblib
@@ -156,10 +193,3 @@ Metriques calculees sur le test set (179 passagers) :
 
 Projet realise par **Kevin Sauvage** dans une demarche d'apprentissage et de valorisation
 des competences en Data Science et Machine Learning.
-
----
-
-## A venir
-
-- Analyse SHAP pour l'interpretabilite du modele
-- Deploiement sur Streamlit Cloud ou Hugging Face Spaces
